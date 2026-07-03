@@ -121,4 +121,41 @@ Expected behavior
 Screenshots or reproduction steps when relevant
 License
 
-License terms are not finalized yet. A formal license file will be added before broader public release.
+Frontend: MIT License (public, reusable)
+Backend: Proprietary / private (not open source, protected data and business logic)
+Use this in GitHub.
+
+A. LICENSE file (MIT)
+
+MIT License
+
+Copyright (c) 2026 Project Dream No.1 Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the Software), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+B. Add this section to README.md
+
+License
+
+This frontend repository is released under the MIT License.
+
+Backend status and data protection
+
+The backend is currently private and is not included in this public repository.
+This decision is intentional to protect sensitive business data, internal service logic, and production security configuration.
