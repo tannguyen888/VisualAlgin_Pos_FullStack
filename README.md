@@ -98,16 +98,16 @@ A sanitized API contract may be released in the future for collaboration purpose
 ## Routes
 
 ### Public
-- `/store`
-- `/store/cart`
-- `/store/checkout`
-- `/user/login`
-- `/register`
+- /store
+- /store/cart
+- /store/checkout
+- /user/login
+- /register
 
 ### Staff
-- `/staff/login`
-- `/cashier`
-- `/admin`
+- /staff/login
+- /cashier
+- /admin
 
 ---
 ## Environment Setup
@@ -123,7 +123,7 @@ npm run test:unit
 ---------------
 ### Required Environment Variables
 
-```env
+env
 VITE_API_BASE_URL=http://localhost:5000
 VITE_STRIPE_PUBLISHABLE_KEY=your_publishable_key_here
 
