@@ -95,11 +95,39 @@ A sanitized API contract may be released in the future for collaboration purpose
 - Protected route guards with role normalization
 
 ---
+## Routes
 
+### Public
+- `/store`
+- `/store/cart`
+- `/store/checkout`
+- `/user/login`
+- `/register`
+
+### Staff
+- `/staff/login`
+- `/cashier`
+- `/admin`
+
+---
 ## Environment Setup
-
+Run Project
+---------------
+npm install
+---------------
+npm run dev
+---------------
+npm run build
+---------------
+npm run test:unit
+---------------
 ### Required Environment Variables
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000
 VITE_STRIPE_PUBLISHABLE_KEY=your_publishable_key_here
+
+License
+
+Frontend: MIT License
+Backend: Private (proprietary business logic & data protection)
