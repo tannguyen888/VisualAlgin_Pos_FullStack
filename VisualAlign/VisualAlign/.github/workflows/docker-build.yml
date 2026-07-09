@@ -1,0 +1,37 @@
+name: Build and Test Docker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t visualalign-backend .
+
+      - name: Run container to verify it starts
+        run: docker run -d --name test-container -p 5000:5000 visualalign-backend
+
+      - name: Wait for app to boot
+        run: sleep 15
+
+      - name: Check container is still running
+        run: docker ps | grep test-container
+
+      - name: Show logs if failed
+        if: failure()
+        run: docker logs test-container
+
+      - name: Clean up
+        if: always()
+        run: docker rm -f test-container
