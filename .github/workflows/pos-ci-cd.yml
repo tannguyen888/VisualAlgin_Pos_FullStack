@@ -1,0 +1,145 @@
+name: POS CI/CD
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'VisualAlign/VisualAlign/**'
+      - 'VisualAlign_frontend/VisualAlignFE/**'
+      - '.github/workflows/pos-ci-cd.yml'
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'VisualAlign/VisualAlign/**'
+      - 'VisualAlign_frontend/VisualAlignFE/**'
+      - '.github/workflows/pos-ci-cd.yml'
+
+jobs:
+  backend-ci:
+    name: Backend CI (Spring Boot)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: VisualAlign/VisualAlign
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Ensure Maven wrapper executable
+        run: chmod +x mvnw
+
+      - name: Compile backend
+        run: ./mvnw -B -DskipTests compile
+
+  frontend-ci:
+    name: Frontend CI (Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: VisualAlign_frontend/VisualAlignFE
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: VisualAlign_frontend/VisualAlignFE/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests (if any)
+        run: npm run test:unit --if-present
+
+      - name: Build frontend
+        run: npm run build
+
+  docker-cd:
+    name: Docker CD (GHCR)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend-ci, frontend-ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Backend Docker metadata
+        id: meta_backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/visualalign-backend
+          tags: |
+            type=sha
+            type=raw,value=latest
+
+      - name: Frontend Docker metadata
+        id: meta_frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/visualalign-frontend
+          tags: |
+            type=sha
+            type=raw,value=latest
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: VisualAlign/VisualAlign
+          file: VisualAlign/VisualAlign/Dockerfile
+          push: true
+          tags: ${{ steps.meta_backend.outputs.tags }}
+          labels: ${{ steps.meta_backend.outputs.labels }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: VisualAlign_frontend/VisualAlignFE
+          file: VisualAlign_frontend/VisualAlignFE/Dockerfile
+          push: true
+          tags: ${{ steps.meta_frontend.outputs.tags }}
+          labels: ${{ steps.meta_frontend.outputs.labels }}
+
+  deploy-vps:
+    name: Deploy to VPS
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [docker-cd]
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script_stop: true
+          script: |
+            set -e
+            cd "${{ secrets.VPS_DEPLOY_PATH }}"
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f
