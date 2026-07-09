@@ -1,0 +1,5 @@
+package com.VisualAlign.VisualAlign.domain;
+
+public enum UserRole {
+    ROLE_USER, ROLE_STORE_ADMIN, ROLE_BRANCH_CASHIER, ROLE_MANAGER, ROLE_BRANCH_MANAGER, ROLE_STORE_MANAGER, ROLE_ADMIN
+}
